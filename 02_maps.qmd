@@ -3,7 +3,7 @@ title: "Creating informative maps"
 sidebar: false
 format:
   html: default
-editor_options: 
+editor_options:  
   chunk_output_type: console
 ---
 
