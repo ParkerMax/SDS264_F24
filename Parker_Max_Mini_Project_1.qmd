@@ -1,6 +1,11 @@
 ---
 title: "Mini Project 1: Parker Max"
-format: html
+sidebar: false
+format:
+  pdf: default
+editor_options:  
+  chunk_output_type: console
+---
 ---
 ```{r}
 #| message: false
