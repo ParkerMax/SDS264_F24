@@ -1,0 +1,137 @@
+---
+title: "Interactive Maps"
+author: "Parker Max"
+format: html
+---
+
+**INTERACTIVE MAP #1: PCE by US STATE**
+```{r}
+library(leaflet)
+library(sf)
+library(leaflet) 
+library(htmltools)
+library(glue)
+library(dplyr) #reading in all the needed libraries
+PCE2 <- read.csv("spending.csv") #Reads the 2023 PCE Data
+
+states <- read_sf("https://rstudio.github.io/leaflet/json/us-states.geojson")
+# Merge PCE data with states
+states <- states |> 
+  left_join(PCE2, by = c("name" = "State"))
+
+# Create bins for PCE values
+bins <- c(0, 200000, 700000, 1200000, 1700000, 2200000, Inf)
+pal <- colorBin("YlOrRd", domain = states$X2023, bins = bins)
+
+states <- states |> # Create labels for hover tooltips
+  mutate(labels = glue("<strong>{name}</strong><br/>PCE: ${X2023} Million"))
+
+labels <- lapply(states$labels, HTML)
+
+leaflet(states) |> # Generate interactive map
+  setView(-96, 37.8, 4) |>
+  addTiles() |>
+  addPolygons(
+    fillColor = ~pal(X2023),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto")) |>
+  addLegend(pal = pal, values = ~`X2023`, opacity = 0.7, title = "2023 PCE in Millions of Dollars",
+    position = "bottomright")
+```
+This is an interactive leaflet map. It shows Personal Consumption Expenditure (PCE) data by state for 2023 in millions of dollars. The states are color coded using a gradient, where lighter colors represents lower PCE values and darker colors indicates higher values. Hovering over the states shows the data from the Bureau of Economic Analysis shows that Texas ($2,000M+), California ($2,500M+), and Florida ($1,300M+) have the highest consumer spending. In contrast, states in the Midwest and Mountain West generally have lower PCE, with many below $500M. This shows the regional differences in economic activity and consumer spending across the U.S.
+
+
+**INTERACTIVE MAP #2: WHICH STATES HAVE AT LEAST ONE NATIONAL PARK?**
+
+
+```{r}
+nps_parks <- read_csv("nps_parks.csv")
+nps_parks$state <- tolower(nps_parks$state) #when I manually entered the data, the states are lower case.
+us_states <- map_data("state")
+map2 <- us_states |> 
+  left_join(nps_parks, by = c("region" = "state")) #joins the parks data with the mapping data
+ggplot(map2, aes(long, lat, group = group, fill = factor(park))) + #treated as a categorical (factor) variable rather than a continuous one
+  geom_polygon(color = "black") +
+  scale_fill_manual(
+    values = c("1" = "darkgreen", "0" = "chocolate4"), #the data is 0 = No, 1 = yes, there is a park in this state
+    name = "Has a National Park",
+    labels = c("No", "Yes")
+  ) +
+  theme_void() +
+  labs(title = "US States with a National Park",
+       caption = "Data Source: National Park Service & Wikipedia (Manual Entry)")
+
+
+
+```
+This choropleth map of the United States showing which states have at least one national park. States with at least one national park are shaded in dark green, while those without any are shaded in brown (the two colors of the National Parks Service!). The maps shows that the majority of US States has at least one national park in their state. The data on whether or not the states have a national park comes from the National Park Service and Wikipedia, then manually entered into a csv file. 
+
+
+
+```{r}
+states <- read_sf("https://rstudio.github.io/leaflet/json/us-states.geojson")
+nps_parks_int <- read.csv("nps_parks.csv") #creates the nps_parks_int for interactive parks
+# Merge nps data with states
+states <- states |> 
+  left_join(nps_parks_int, by = c("name" = "state"))
+
+# Create bins for PCE values
+pal <- colorFactor(
+  palette = c("chocolate4", "darkgreen"), # No = brown, Yes = green, color scale, these are the colors of the NPS!
+  domain = states$park
+)
+
+
+states <- states |> 
+  mutate(labels = ifelse(park == 1, 
+                         glue("<strong>{name}</strong><br/>Has at least one National Park"), 
+                         glue("<strong>{name}</strong><br/>No National Park"))) #Creating the message that appears when I hover over a state
+
+labels <- lapply(states$labels, HTML) 
+
+leaflet(states) |> #creating the leaflet map
+  setView(-96, 37.8, 4) |>
+  addTiles() |>
+  addPolygons(
+    fillColor = ~pal(park),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto")) |>
+  addLegend(
+    pal = pal, 
+    values = ~park, 
+    labels = c("No", "Yes"), #labels 
+    opacity = 0.7, 
+    title = "Has a National Park?",
+    position = "bottomright")
+
+```
+This an interactive leaflet map of the United States showing which states have at least one national park. States with at least one national park are shaded in dark green, while those without any are shaded in brown. From looking at the map and hovering over each state, it shows that the majority of US States has at least one national park in their state. The data on whether or not the states have a national park comes from the National Park Service and Wikipedia, then manually entered into a csv file. 
+
