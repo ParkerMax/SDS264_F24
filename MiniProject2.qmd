@@ -1,0 +1,5 @@
+---
+title: "MiniProject2"
+author: "Parker Max & Josh Charlton"
+format: html
+---

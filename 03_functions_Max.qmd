@@ -1,7 +1,8 @@
 ---
 title: "Functions and tidy evaluation"
+author: Parker Max
 format:
-  html: default
+  pdf: default
 editor_options: 
   chunk_output_type: console
 ---
@@ -794,7 +795,7 @@ fun15 <- function(x){
 
 }
 
-fun15(c(1, 2, 3, 4))
+fun15(c(1, 2, 3, 4, 5))
 ```
 
 
@@ -803,11 +804,10 @@ fun15(c(1, 2, 3, 4))
 
 Hint: start with a ggplot with no user input, and then functionize:
 
-```{r}
-#| eval: FALSE
-
+```{r, eval=FALSE}
+library(ggplot2)
 library(ggrepel)
-scatterfun <- function(data, center = "mean", spread = "sd") {
+scatterfun <- function(data, center, spread) {
   ggplot(data, aes(x = .data[[center]], y = .data[[spread]])) + 
     geom_point(aes(size = n)) +
     geom_smooth(method = "lm") +
@@ -817,9 +817,10 @@ scatterfun <- function(data, center = "mean", spread = "sd") {
       x = center,
       y = spread)
 }
+print(scatterfun(party_age, center = "mean", spread = "sd"))
+print(scatterfun(party_age, center = "median", spread = "IQR"))
 
-scatterfun(party_age, center = "mean", spread = "sd")
-scatterfun(party_age, center = "median", spread = "IQR")
 
 ```
+
 

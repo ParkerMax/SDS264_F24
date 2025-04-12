@@ -1,0 +1,262 @@
+---
+title: "Homework 3"
+author: "Parker Max"
+format: pdf
+---
+
+
+## 07_apis.qmd, 2 & 3
+
+```{r}
+library(httr2)
+library(dplyr)
+library(purrr)
+library(janitor)
+library(readr)
+library(tidyverse)
+library(stringr)
+library(httr)
+
+CENSUS_API_KEY <- Sys.getenv("37bad5556b08128ca1a356df4a38f0cfbcb6da04")
+```
+
+```{r}
+
+rice_data <- function(year, county, variables) {
+  tidycensus::get_acs(
+    Sys.sleep(0.5),
+    year = year,
+    state = "MN",
+    geography = "tract",
+    variables = variables,
+    output = "wide",
+    geometry = TRUE,
+    county = county
+  ) |>
+    mutate(year = year)
+}
+
+
+check_rice <- rice_data(year = 2022,
+              county = "Rice", 
+              variables = c("B01003_001", "B25077_001"))
+
+
+
+# Use map and list_rbind to collect data across years
+2019:2021 |>
+  purrr::map(\(x) 
+    rice_data(
+      x,
+      county = "Rice", 
+      variables = c("B25077_001", "B01003_001")
+    )
+  ) |>
+  list_rbind()
+
+
+
+
+#This code worked on 3/25/2025
+
+```
+
+
+## 07_apis.qmd: OMDB example - obtain a key and assemble your own well-formatted 5x5 tibble with 5 movies of your choosing and 5 variables of your choosing (see what else is available)
+
+
+```{r}
+
+Sys.setenv(OMDB_KEY = "9f415c54")
+myapikey <- Sys.getenv("9f415c54")
+
+
+movies <- c("Moneyball", "The+Secret+Life+of+Walter+Mitty", "McFarland,+USA", 
+            "Interstellar", "Inglourious+Basterds")
+
+# Set up empty tibble
+omdb <- tibble(Title = character(), Language = character(), Director = character(),
+       Awards = character(), imdbRating = double(), Released = double())
+
+# Use for loop to run through API request process 5 times,
+#   each time filling the next row in the tibble
+#  - can do max of 1000 GETs per day
+for(i in 1:5) {
+  url <- str_c("http://www.omdbapi.com/?t=",movies[i],
+               "&apikey=9f415c54", myapikey)
+  Sys.sleep(0.5)
+  onemovie <- GET(url)
+  details <- content(onemovie, "parse")
+  omdb[i,1] <- details$Title
+  omdb[i,2] <- details$Language
+  omdb[i,3] <- details$Director
+  omdb[i,4] <- details$Awards
+  omdb[i,5] <- parse_number(details$imdbRating)
+  omdb[i,6] <- parse_number(details$Released)
+  omdb[i,7] <- details$Type
+}
+
+omdb
+
+#This code worked on 3/25/2025
+```
+
+
+
+
+## Table Scraping
+
+
+```{r}
+library(polite)
+library(rvest)
+library(janitor)
+library(stringr)
+library(dplyr)
+library(purrr)
+
+```
+
+
+#2
+```{r}
+library(janitor)
+library(dplyr)
+library(stringr)
+library(purrr)
+
+# Function to scrape the scoring regular season table for a given team and year
+hockey_stats <- function(team, year) {
+  # Construct URL
+  url <- str_c("https://www.hockey-reference.com/teams/", team, "/", year, ".html")
+  
+  # Start a polite session
+  session <- bow(url, force = TRUE)
+  
+  # Scrape the webpage and extract tables
+  result <- scrape(session) |> 
+    html_nodes("table") |> 
+    html_table(header = TRUE, fill = TRUE)
+  
+    stats_table <- result[[5]] |> 
+    row_to_names(row_number = 1) |>  # Use first row as column names
+    clean_names() |>
+    select(player, age, pos, gp, pts) |>  
+    mutate(year = year)
+  
+  return(stats_table)
+}
+#hockey_stats("MIN", 2001)
+#hockey_stats("MIN", 2002)
+#hockey_stats("MIN", 2003)
+#hockey_stats("MIN", 2004)
+
+years <- 2001:2004
+teams <- rep("MIN", length(years))  # Repeat "MIN" for each year
+#hockey <- map2(teams, years, hockey_stats)  
+#hockey_data <- list_rbind(hockey)  
+
+
+```
+
+
+
+
+
+
+
+
+## Web Scraping
+
+```{r}
+#| include: FALSE
+
+library(tidyverse)
+library(stringr)
+library(rvest)
+library(polite)
+library(sf)
+library(maps)
+library(viridis)
+library(leaflet)
+library(htmltools)
+
+# Starter step: install SelectorGadget (https://selectorgadget.com/) in your browser
+
+```
+
+
+
+
+
+```{r}
+#| eval: FALSE
+library(purrr)
+
+# Helper function to reduce html_nodes() |> html_text() code duplication
+get_text_from_page <- function(page, css_selector) {
+  page|>
+    html_nodes(css_selector)|>
+    html_text()
+
+}
+
+# Main function to scrape and tidy desired attributes
+scrape_page <- function(url) {
+    Sys.sleep(2)
+    page <- read_html(url)
+    article_titles <- get_text_from_page(page, ".teaser-title")
+    article_dates <- get_text_from_page(page, ".date-display-single")
+    article_dates <- mdy(article_dates)
+    article_description <- get_text_from_page(page, ".teaser-description")
+    article_description <- str_trim(str_replace(article_description, 
+                                                ".*\\n", 
+                                                ""))
+    
+    tibble(title = article_titles,
+           pubdate = article_dates,
+           description = article_description)
+
+}
+
+scrape_page("https://www.nih.gov/news-events/news-releases")
+
+```
+
+Use a for loop over the first 5 pages:
+
+```{r}
+#| eval: FALSE
+
+pages <- vector("list", length = 6)
+pos <- 0
+
+for (i in 2025:2024) {
+  for (j in 0:2) {
+    pos <- pos + 1
+    url <- str_c("https://www.nih.gov/news-events/news-releases?", i,
+                 "&page=", j, "&1=")
+    pages[[pos]] <- scrape_page(url)
+  }
+}
+
+df_articles <- bind_rows(pages)
+head(df_articles)
+
+```
+
+
+Use map functions in the purrr package:
+
+```{r}
+#| eval: FALSE
+
+# Create a character vector of URLs for the first 5 pages
+base_url <- "https://www.nih.gov/news-events/news-releases"
+urls_all_pages <- str_c(base_url, "?2025&page=", 0:4, "&1=")
+
+
+pages2 <- purrr::map(urls_all_pages, scrape_page)
+df_articles2 <- bind_rows(pages2)
+head(df_articles2)
+```

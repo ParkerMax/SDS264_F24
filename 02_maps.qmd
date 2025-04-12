@@ -103,7 +103,7 @@ vacc_mar13 |>
   right_join(us_states, by = c("State" = "region")) |>
   rename(region = State) |>
   ggplot(mapping = aes(x = long, y = lat,
-                          group = group)) + 
+                          group1 = group)) + 
   geom_polygon(aes(fill = people_vaccinated_per100), color = "black")
 ```
 
