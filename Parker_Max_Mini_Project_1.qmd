@@ -2,7 +2,7 @@
 title: "Mini Project 1: Parker Max"
 sidebar: false
 format:
-  pdf: default
+  html: default
 editor_options:  
   chunk_output_type: console
 ---
@@ -45,7 +45,7 @@ static_map1 <- ggplot(map1,(aes(x = long, y = lat, group = group, fill = PCE_cat
 print(static_map1)
 ```
 
-This choropleth map of the United States shows Personal Consumption Expenditure (PCE) data by state for 2023 in millions of dollars. The states are color coded using a gradient, where lighter colors represents lower PCE values and darker blue indicates higher values. The data from the Bureau of Economic Analysis shows that Texas ($2,000M+), California ($2,500M+), and Florida ($1,500M+) have the highest consumer spending. In contrast, states in the Midwest and Mountain West generally have lower PCE, with many below $500M. This shows the regional differences in economic activity and consumer spending across the U.S. 
+This choropleth map of the United States shows Personal Consumption Expenditure (PCE) data by state for 2023 in millions of dollars. The states are color coded using a gradient, where lighter colors represents lower PCE values and darker blue indicates higher values. The data from the Bureau of Economic Analysis shows that Texas ($1,500M+), California ($2,500M+), and Florida ($1,500M+) have the highest consumer spending. In contrast, states in the Midwest and Mountain West generally have lower PCE, with many below $500M. This shows the regional differences in economic activity and consumer spending across the U.S. 
 
 
 [Interactive PCE]
@@ -96,7 +96,7 @@ leaflet(states) |> # Generate interactive map
   addLegend(pal = pal, values = ~`X2023`, opacity = 0.7, title = "2023 PCE in Millions of Dollars",
     position = "bottomright")
 ```
-This is an interactive leaflet map. It shows Personal Consumption Expenditure (PCE) data by state for 2023 in millions of dollars. The states are color coded using a gradient, where lighter colors represents lower PCE values and darker colors indicates higher values. Hovering over the states shows the data from the Bureau of Economic Analysis shows that Texas ($2,000M+), California ($2,500M+), and Florida ($1,300M+) have the highest consumer spending. In contrast, states in the Midwest and Mountain West generally have lower PCE, with many below $500M. This shows the regional differences in economic activity and consumer spending across the U.S.
+This is an interactive leaflet map. It shows Personal Consumption Expenditure (PCE) data by state for 2023 in millions of dollars. The states are color coded using a gradient, where lighter colors represents lower PCE values and darker colors indicates higher values. Hovering over the states shows the data from the Bureau of Economic Analysis shows that Texas ($1,500M+), California ($2,500M+), and Florida ($1,300M+) have the highest consumer spending. In contrast, states in the Midwest and Mountain West generally have lower PCE, with many below $500M. This shows the regional differences in economic activity and consumer spending across the U.S.
 
 
 

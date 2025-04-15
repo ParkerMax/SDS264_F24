@@ -57,31 +57,6 @@ This is an interactive leaflet map. It shows Personal Consumption Expenditure (P
 
 **INTERACTIVE MAP #2: WHICH STATES HAVE AT LEAST ONE NATIONAL PARK?**
 
-
-```{r}
-nps_parks <- read_csv("nps_parks.csv")
-nps_parks$state <- tolower(nps_parks$state) #when I manually entered the data, the states are lower case.
-us_states <- map_data("state")
-map2 <- us_states |> 
-  left_join(nps_parks, by = c("region" = "state")) #joins the parks data with the mapping data
-ggplot(map2, aes(long, lat, group = group, fill = factor(park))) + #treated as a categorical (factor) variable rather than a continuous one
-  geom_polygon(color = "black") +
-  scale_fill_manual(
-    values = c("1" = "darkgreen", "0" = "chocolate4"), #the data is 0 = No, 1 = yes, there is a park in this state
-    name = "Has a National Park",
-    labels = c("No", "Yes")
-  ) +
-  theme_void() +
-  labs(title = "US States with a National Park",
-       caption = "Data Source: National Park Service & Wikipedia (Manual Entry)")
-
-
-
-```
-This choropleth map of the United States showing which states have at least one national park. States with at least one national park are shaded in dark green, while those without any are shaded in brown (the two colors of the National Parks Service!). The maps shows that the majority of US States has at least one national park in their state. The data on whether or not the states have a national park comes from the National Park Service and Wikipedia, then manually entered into a csv file. 
-
-
-
 ```{r}
 states <- read_sf("https://rstudio.github.io/leaflet/json/us-states.geojson")
 nps_parks_int <- read.csv("nps_parks.csv") #creates the nps_parks_int for interactive parks
